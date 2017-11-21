@@ -51,4 +51,5 @@ const update = () => {
 }
 
 update()
-const start = setInterval(update, 10000)
+
+const start = setInterval(update, 100000)
