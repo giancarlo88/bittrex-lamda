@@ -10,7 +10,7 @@ const makeSign = (uri) => {
 }
 
 const makeNonce = () => Date.now()
-const getBalances = async () => {
+const getCurrencies = async () => {
   const uri = `${url}/account/getbalances?apikey=${process.env.API_KEY}&nonce=${makeNonce()}`
   const sign = makeSign(uri)
   const res = await request.get(uri).set('apisign', sign)
@@ -21,19 +21,26 @@ const getBalances = async () => {
 const getTicker = async (market) => {
   const uri = `${url}/public/getticker?market=${market}`
   const res = await request.get(uri)
-  if (res.body && res.body.success) return res.body
+  if (res.body && res.body.success) return res.body.result
   throw res.body.message
 }
 
-const update = () => {
+const update = async () => {
   write.message('🤔  Updating! 🤔')
   console.clear()
 
-  Promise.all([getBalances(), getTicker('BTC-LTC'), getTicker('BTC-NAV')])
-    .then((res) => write.update(res))
-    .catch((err) => {
-      return new Error(write.error(`🔥  There was an error: 🔥\n ${err}`))
+  const currencies = await getCurrencies()
+
+  const tickers = await Promise.all(
+    currencies.result.map(async ({ Currency }) => {
+      if (Currency === 'BTC') return { Currency }
+      const res = await getTicker(`BTC-${Currency}`)
+      return { Currency, res }
     })
+  )
+
+  await write.currencies(currencies)
+  await write.tickers(tickers)
 }
 
 update()
