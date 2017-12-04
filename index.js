@@ -1,6 +1,8 @@
 require('dotenv').config()
 const crypto = require('crypto')
 const request = require('superagent')
+const calculate = require('./calculate')
+const updateSheet = require('./google')
 const url = 'https://bittrex.com/api/v1.1'
 
 const makeSign = uri => {
@@ -44,20 +46,27 @@ const getTicker = market =>
       })
   })
 
-makeTickerRequests = currencies =>
-  currencies.result.map(
-    ({ Currency }) =>
-      new Promise((resolve, reject) => {
-        if (Currency === 'BTC') return resolve({ Currency })
-        getTicker(`BTC-${Currency}`).then(res => resolve({ Currency, res }))
+const makeTickerRequests = currencies => {
+  console.log(currencies)
+  return currencies.result.map(
+    ({ Currency: currency, Available: available }) =>
+      new Promise(resolve => {
+        if (currency === 'BTC') return resolve({ currency, available })
+        getTicker(`BTC-${currency}`).then(res =>
+          resolve({
+            currency,
+            available: Number(available),
+            price: Number(res.Last)
+          })
+        )
       })
   )
+}
 
-const mapTickers = currencies =>
-  new Promise((resolve, reject) => {
-    const tickers = Promise.all(makeTickerRequests(currencies))
-    return resolve(tickers)
-  })
+const mapTickers = currencies => {
+  const tickers = Promise.all(makeTickerRequests(currencies))
+  return Promise.resolve(tickers)
+}
 
 const update = () =>
   new Promise((resolve, reject) => {
@@ -65,10 +74,11 @@ const update = () =>
       .then(currencies => mapTickers(currencies))
       .then(results => resolve(results))
       .catch(err => {
-        return console.log(err)
+        return reject(err)
       })
   })
 
 update().then(res => {
-  console.log(res)
+  const value = calculate(res)
+  updateSheet(value)
 })
