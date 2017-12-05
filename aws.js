@@ -10,7 +10,7 @@ const updateDB = value => {
 
   const table = 'btx-tracker'
 
-  const date = new Date(Date.now())
+  const date = new Date(Date.now()).toString()
 
   var params = {
     TableName: table,
