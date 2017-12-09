@@ -1,41 +1,34 @@
 const AWS = require('aws-sdk')
 
-const updateDB = value => {
-  AWS.config.update({
-    region: 'eu-west-2',
-    endpoint: 'dynamodb.eu-west-2.amazonaws.com'
-  })
+const updateDB = (value) =>
+  new Promise((resolve, reject) => {
+    AWS.config.update({
+      region: 'eu-west-2',
+      endpoint: 'dynamodb.eu-west-2.amazonaws.com'
+    })
 
-  const client = new AWS.DynamoDB.DocumentClient()
+    const client = new AWS.DynamoDB.DocumentClient()
 
-  const table = 'btx'
+    const table = 'btx'
 
-  const date = new Date(Date.now()).toString()
+    const date = new Date(Date.now()).toString()
 
-  var params = {
-    TableName: table,
-    Item: {
-      date,
-      value
+    var params = {
+      TableName: table,
+      Item: {
+        date,
+        value
+      }
     }
-  }
-  client.put(params, (err) => {
-    if (err) {
-      console.error(
-        '\n💣 Failed to add to table for the following reason: \n',
-        JSON.stringify(err, null, 2)
-      )
-    } else {
-      // TODO: determine why the data object in the callback is empty
-      console.log(`
-      📝 Added the following information to the table:
-      date: ${params.Item.date}
-      BTC value: ${params.Item.value}
-
-      ✅ All done.
-      `)
-    }
+    client.put(params, (err, data) => {
+      if (err) {
+        return reject(err)
+      } else {
+        console.log(data)
+        // TODO: determine why the data object in the callback is empty
+        return resolve(params)
+      }
+    })
   })
-}
 
 module.exports = updateDB

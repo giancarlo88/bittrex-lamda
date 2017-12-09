@@ -5,7 +5,7 @@ const calculate = require('./calculate')
 const updateDB = require('./aws')
 const url = 'https://bittrex.com/api/v1.1'
 
-module.exports.track = function index() {
+module.exports.track = function index(event, context, cb) {
   const makeSign = (uri) => {
     return crypto.createHmac('sha512', process.env.API_SECRET).update(uri).digest('hex')
   }
@@ -87,12 +87,24 @@ module.exports.track = function index() {
         })
     })
 
-  update()
+  return update()
     .then((res) => {
       const value = calculate(res)
-      updateDB(value)
+      return updateDB(value)
+    })
+    .then((params) => {
+      console.log(`
+      📝 Added the following information to the table:
+
+      date: ${params.Item.date}
+      BTC value: ${params.Item.value}
+
+      ✅ All done.
+    `)
+      cb(null, '🎉')
     })
     .catch((err) => {
-      console.warn(err)
+      console.error('\n💣 Failed to add to table for the following reason: \n', err)
+      return cb(err)
     })
 }
