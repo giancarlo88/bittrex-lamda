@@ -1,7 +1,8 @@
 {
   "dependencies": {
     "aws-sdk": "^2.163.0",
-    "superagent": "^3.8.1"
+    "superagent": "^3.8.1",
+    "dotenv": "^4.0.0"
   },
   "devDependencies": {
     "babel-eslint": "^7.2.3",

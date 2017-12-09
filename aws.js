@@ -8,27 +8,32 @@ const updateDB = value => {
 
   const client = new AWS.DynamoDB.DocumentClient()
 
-  const table = 'btx-tracker'
+  const table = 'btx'
 
   const date = new Date(Date.now()).toString()
 
   var params = {
     TableName: table,
     Item: {
-      Date: date,
-      price: value
+      date,
+      value
     }
   }
-
-  console.log('Adding a new item...')
-  client.put(params, function(err, data) {
+  client.put(params, (err) => {
     if (err) {
       console.error(
-        'Unable to add item. Error JSON:',
+        '\n💣 Failed to add to table for the following reason: \n',
         JSON.stringify(err, null, 2)
       )
     } else {
-      console.log('Added item:', JSON.stringify(data, null, 2))
+      // TODO: determine why the data object in the callback is empty
+      console.log(`
+      📝 Added the following information to the table:
+      date: ${params.Item.date}
+      BTC value: ${params.Item.value}
+
+      ✅ All done.
+      `)
     }
   })
 }
