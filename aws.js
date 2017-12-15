@@ -1,6 +1,6 @@
 const AWS = require('aws-sdk')
 
-const updateDB = (value) =>
+const update = (value) =>
   new Promise((resolve, reject) => {
     AWS.config.update({
       region: 'eu-west-2',
@@ -8,12 +8,10 @@ const updateDB = (value) =>
     })
 
     const client = new AWS.DynamoDB.DocumentClient()
-
     const table = 'btx'
-
     const date = new Date(Date.now()).toString()
 
-    var params = {
+    const params = {
       TableName: table,
       Item: {
         date,
@@ -31,4 +29,4 @@ const updateDB = (value) =>
     })
   })
 
-module.exports = updateDB
+module.exports = { update }
