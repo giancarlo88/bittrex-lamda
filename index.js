@@ -7,7 +7,7 @@ module.exports.track = function index(event, context, cb) {
   return fetchData()
     .then((res) => {
       const value = calculate(res)
-      return aws.updateDB(value)
+      return aws.update(value)
     })
     .then((params) => {
       console.log(`
