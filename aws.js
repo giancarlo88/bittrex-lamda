@@ -9,13 +9,15 @@ const update = (value) =>
 
     const client = new AWS.DynamoDB.DocumentClient()
     const table = 'btx'
-    const date = new Date(Date.now()).toString()
+    const utc = Date.now()
+    const date = new Date(utc).toString()
 
     const params = {
       TableName: table,
       Item: {
         date,
-        value
+        value,
+        utc
       }
     }
     client.put(params, (err, data) => {
